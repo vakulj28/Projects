@@ -1,0 +1,11 @@
+{
+  "name": "hello-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "server.ts",
+  "scripts": {
+    "start": "node server.ts",
+    "deploy": "aws lambda-web deploy --name hello-web --code ."
+  }
+}
