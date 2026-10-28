@@ -1,0 +1,42 @@
+variable "aws_region" {
+  type    = string
+  default = "eu-west-1"
+}
+
+variable "aws_profile" {
+  type    = string
+  default = "chatbot"
+}
+
+variable "project" {
+  type    = string
+  default = "bedrock-chatbot"
+}
+
+variable "state_bucket_name" {
+  description = "Globally-unique S3 bucket name for remote Terraform state"
+  type        = string
+}
+
+variable "github_repo" {
+  description = "owner/name of the GitHub repo that CI runs from"
+  type        = string
+  default     = "vakulj28/Projects"
+}
+
+variable "github_environment" {
+  description = "GitHub Environment the deploy role will trust (created later)"
+  type        = string
+  default     = "bedrock-chatbot-prod"
+}
+
+variable "budget_limit_usd" {
+  description = "Monthly budget ceiling in USD"
+  type        = string
+  default     = "5"
+}
+
+variable "budget_notify_email" {
+  description = "Email that receives budget alerts"
+  type        = string
+}
