@@ -14,6 +14,10 @@ output "ci_apply_role_arn" {
   value = aws_iam_role.ci_apply.arn
 }
 
+output "ci_deploy_role_arn" {
+  value = aws_iam_role.ci_deploy.arn
+}
+
 output "account_id" {
   value = data.aws_caller_identity.current.account_id
 }

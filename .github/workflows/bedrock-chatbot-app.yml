@@ -62,6 +62,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
     defaults:
       run:
         working-directory: bedrock-chatbot/app
@@ -78,6 +79,18 @@ jobs:
         with:
           name: dist
           path: bedrock-chatbot/app/dist
+
+      # Assume the app-deploy role via OIDC (write to the code bucket only).
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: eu-west-1
+
+      # Zip the bundle (index.js at the zip root) and upload it to the code bucket.
+      - name: Package and upload to S3
+        run: |
+          (cd dist && zip -r ../app.zip .)
+          aws s3 cp app.zip "s3://${{ vars.AWS_CODE_BUCKET }}/app.zip"
 
       # Each run gets a unique prerelease version so publish never collides.
       - name: Set version

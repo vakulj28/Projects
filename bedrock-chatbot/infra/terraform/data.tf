@@ -180,3 +180,52 @@ data "aws_iam_policy_document" "apply" {
     resources = ["*"]
   }
 }
+
+# Trust for the app-deploy role: automatic on pushes to main (CD, ungated).
+data "aws_iam_policy_document" "deploy_trust" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+
+    principals {
+      type        = "Federated"
+      identifiers = [aws_iam_openid_connect_provider.github.arn]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:repository"
+      values   = [var.github_repo]
+    }
+
+    condition {
+      test     = "StringLike"
+      variable = "token.actions.githubusercontent.com:sub"
+      values   = ["repo:*:ref:refs/heads/main"]
+    }
+  }
+}
+
+# Least-privilege app deploy: write the code package to the code bucket only.
+data "aws_iam_policy_document" "deploy" {
+  statement {
+    sid    = "UploadCode"
+    effect = "Allow"
+    actions = [
+      "s3:PutObject",
+      "s3:GetObject",
+      "s3:GetObjectVersion",
+      "s3:ListBucket",
+    ]
+    resources = [
+      aws_s3_bucket.code.arn,
+      "${aws_s3_bucket.code.arn}/*",
+    ]
+  }
+}
