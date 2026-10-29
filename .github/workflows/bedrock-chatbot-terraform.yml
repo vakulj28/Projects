@@ -5,6 +5,7 @@ on:
     paths:
       - "bedrock-chatbot/infra/terraform/**"
       - ".github/workflows/bedrock-chatbot-terraform.yml"
+  workflow_dispatch:
 
 # id-token for OIDC; contents read for checkout.
 permissions:
