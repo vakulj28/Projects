@@ -16,7 +16,13 @@ variable "state_bucket_name" {
 variable "github_repo" {
   description = "owner/name of the GitHub repo that CI runs from"
   type        = string
-  default     = "vakulj28/Projects"
+  default     = "vakulj28/BedrockChatbot"
+}
+
+variable "github_actor" {
+  description = "GitHub user allowed to trigger workflows that assume the CI roles"
+  type        = string
+  default     = "vakulj28"
 }
 
 variable "github_environment" {

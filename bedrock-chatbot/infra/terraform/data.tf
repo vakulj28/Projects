@@ -29,6 +29,13 @@ data "aws_iam_policy_document" "plan_trust" {
       values   = [var.github_repo]
     }
 
+    # Public repo: only runs triggered by the owner may assume this role.
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:actor"
+      values   = [var.github_actor]
+    }
+
     # Pull requests (CI) and pushes/manual runs on main may plan.
     condition {
       test     = "StringLike"
@@ -140,6 +147,13 @@ data "aws_iam_policy_document" "apply_trust" {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:repository"
       values   = [var.github_repo]
+    }
+
+    # Public repo: only runs triggered by the owner may assume this role.
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:actor"
+      values   = [var.github_actor]
     }
 
     # Gated by the protected environment; match the clean `environment` claim
@@ -322,6 +336,13 @@ data "aws_iam_policy_document" "deploy_trust" {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:repository"
       values   = [var.github_repo]
+    }
+
+    # Public repo: only runs triggered by the owner may assume this role.
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:actor"
+      values   = [var.github_actor]
     }
 
     condition {

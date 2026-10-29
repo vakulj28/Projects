@@ -83,14 +83,15 @@ jobs:
       # Assume the app-deploy role via OIDC (write to the code bucket only).
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: eu-west-1
+          mask-aws-account-id: true
 
       # Zip the bundle (index.js at the zip root) and upload it to the code bucket.
       - name: Package and upload to S3
         run: |
           (cd dist && zip -r ../app.zip .)
-          aws s3 cp app.zip "s3://${{ vars.AWS_CODE_BUCKET }}/app.zip"
+          aws s3 cp app.zip "s3://${{ secrets.AWS_CODE_BUCKET }}/app.zip"
 
       # Each run gets a unique prerelease version so publish never collides.
       - name: Set version

@@ -40,8 +40,9 @@ jobs:
       # Assume the read-only plan role via GitHub OIDC (no stored keys).
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_PLAN_ROLE_ARN }}
           aws-region: eu-west-1
+          mask-aws-account-id: true
 
       - name: Init
         run: terraform init -input=false
@@ -50,17 +51,10 @@ jobs:
         run: terraform validate -no-color
 
       # -lock=false: the plan role is read-only and can't write the state lock.
+      # The plan stays in this step's log (account ID masked) but isn't
+      # republished to the public job summary.
       - name: Plan
-        id: plan
         run: terraform plan -input=false -lock=false -no-color -var-file=terraform.tfvars
-
-      - name: Publish plan to job summary
-        if: always()
-        run: |
-          echo '### Terraform plan' >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          echo "${{ steps.plan.outputs.stdout }}" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
 
   # Runs only after plan, never on a PR, and pauses for approval because the
   # environment has a required reviewer. Uses the write-capable apply role.
@@ -81,8 +75,9 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.AWS_APPLY_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_APPLY_ROLE_ARN }}
           aws-region: eu-west-1
+          mask-aws-account-id: true
 
       - name: Init
         run: terraform init -input=false
