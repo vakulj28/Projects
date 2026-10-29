@@ -165,17 +165,124 @@ data "aws_iam_policy_document" "apply_trust" {
 # guardrails are the environment approval gate and the environment-scoped trust
 # above. Tightening iam:* with a permissions boundary is a production hardening.
 data "aws_iam_policy_document" "apply" {
+  # Identity lookup used by the config.
   statement {
-    sid    = "ManageStack"
+    sid       = "STS"
+    effect    = "Allow"
+    actions   = ["sts:GetCallerIdentity"]
+    resources = ["*"]
+  }
+
+  # The two project buckets (state + code) and their config.
+  statement {
+    sid    = "S3Buckets"
     effect = "Allow"
     actions = [
-      "s3:*",
-      "iam:*",
-      "budgets:*",
-      "secretsmanager:*",
-      "logs:*",
-      "bedrock:GetInferenceProfile",
-      "bedrock:ListInferenceProfiles",
+      "s3:CreateBucket", "s3:DeleteBucket", "s3:ListBucket", "s3:GetBucketLocation",
+      "s3:GetBucketTagging", "s3:PutBucketTagging",
+      "s3:GetBucketVersioning", "s3:PutBucketVersioning",
+      "s3:GetEncryptionConfiguration", "s3:PutEncryptionConfiguration",
+      "s3:GetBucketPublicAccessBlock", "s3:PutBucketPublicAccessBlock",
+      "s3:GetBucketPolicy", "s3:PutBucketPolicy", "s3:DeleteBucketPolicy", "s3:GetBucketPolicyStatus",
+      "s3:GetBucketAcl", "s3:GetBucketCORS", "s3:GetBucketWebsite", "s3:GetBucketLogging",
+      "s3:GetLifecycleConfiguration", "s3:GetReplicationConfiguration",
+      "s3:GetBucketObjectLockConfiguration", "s3:GetAccelerateConfiguration",
+      "s3:GetBucketRequestPayment", "s3:GetBucketNotification", "s3:GetBucketOwnershipControls",
+    ]
+    resources = ["arn:aws:s3:::bedrock-chatbot-*"]
+  }
+
+  # State and code objects (for the backend and refresh).
+  statement {
+    sid       = "S3Objects"
+    effect    = "Allow"
+    actions   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:GetObjectVersion"]
+    resources = ["arn:aws:s3:::bedrock-chatbot-tfstate/*", "arn:aws:s3:::bedrock-chatbot-code-*/*"]
+  }
+
+  # Only this project's IAM roles.
+  statement {
+    sid    = "IAMRoles"
+    effect = "Allow"
+    actions = [
+      "iam:CreateRole", "iam:DeleteRole", "iam:GetRole", "iam:UpdateRole",
+      "iam:UpdateAssumeRolePolicy", "iam:TagRole", "iam:UntagRole", "iam:ListRoleTags",
+      "iam:PutRolePolicy", "iam:DeleteRolePolicy", "iam:GetRolePolicy", "iam:ListRolePolicies",
+      "iam:AttachRolePolicy", "iam:DetachRolePolicy", "iam:ListAttachedRolePolicies",
+      "iam:ListInstanceProfilesForRole",
+    ]
+    resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/bedrock-chatbot-*"]
+  }
+
+  # The GitHub OIDC provider.
+  statement {
+    sid    = "IAMOIDCProvider"
+    effect = "Allow"
+    actions = [
+      "iam:GetOpenIDConnectProvider", "iam:CreateOpenIDConnectProvider", "iam:DeleteOpenIDConnectProvider",
+      "iam:TagOpenIDConnectProvider", "iam:UntagOpenIDConnectProvider",
+      "iam:AddClientIDToOpenIDConnectProvider", "iam:UpdateOpenIDConnectProviderThumbprint",
+    ]
+    resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/token.actions.githubusercontent.com"]
+  }
+
+  # The monthly budget.
+  statement {
+    sid       = "Budgets"
+    effect    = "Allow"
+    actions   = ["budgets:ViewBudget", "budgets:ModifyBudget"]
+    resources = ["arn:aws:budgets::${data.aws_caller_identity.current.account_id}:budget/bedrock-chatbot-*"]
+  }
+
+  # The access-code secret.
+  statement {
+    sid    = "SecretsManager"
+    effect = "Allow"
+    actions = [
+      "secretsmanager:CreateSecret", "secretsmanager:DeleteSecret", "secretsmanager:DescribeSecret",
+      "secretsmanager:GetSecretValue", "secretsmanager:PutSecretValue", "secretsmanager:UpdateSecret",
+      "secretsmanager:TagResource", "secretsmanager:UntagResource", "secretsmanager:GetResourcePolicy",
+    ]
+    resources = ["arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:bedrock-chatbot/*"]
+  }
+
+  # The Web Function log groups.
+  statement {
+    sid    = "Logs"
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup", "logs:DeleteLogGroup", "logs:DescribeLogGroups",
+      "logs:PutRetentionPolicy", "logs:DeleteRetentionPolicy",
+      "logs:TagResource", "logs:UntagResource", "logs:ListTagsForResource",
+    ]
+    resources = ["arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/web/bedrock-chatbot*"]
+  }
+
+  # CloudFront distribution + OAC + managed-policy lookups. CloudFront actions
+  # don't support resource-level scoping, so they're constrained by action.
+  statement {
+    sid    = "CloudFront"
+    effect = "Allow"
+    actions = [
+      "cloudfront:CreateDistribution", "cloudfront:CreateDistributionWithTags",
+      "cloudfront:GetDistribution", "cloudfront:GetDistributionConfig",
+      "cloudfront:UpdateDistribution", "cloudfront:DeleteDistribution",
+      "cloudfront:TagResource", "cloudfront:UntagResource", "cloudfront:ListTagsForResource",
+      "cloudfront:CreateOriginAccessControl", "cloudfront:GetOriginAccessControl",
+      "cloudfront:UpdateOriginAccessControl", "cloudfront:DeleteOriginAccessControl",
+      "cloudfront:ListCachePolicies", "cloudfront:GetCachePolicy",
+      "cloudfront:ListOriginRequestPolicies", "cloudfront:GetOriginRequestPolicy",
+    ]
+    resources = ["*"]
+  }
+
+  # Cloud Control API (the awscc provider manages the OAC through it).
+  statement {
+    sid    = "CloudControl"
+    effect = "Allow"
+    actions = [
+      "cloudcontrol:CreateResource", "cloudcontrol:GetResource", "cloudcontrol:GetResourceRequestStatus",
+      "cloudcontrol:UpdateResource", "cloudcontrol:DeleteResource", "cloudcontrol:ListResources",
     ]
     resources = ["*"]
   }
