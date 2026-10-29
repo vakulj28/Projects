@@ -192,12 +192,15 @@ data "aws_iam_policy_document" "apply" {
     resources = ["arn:aws:s3:::bedrock-chatbot-*"]
   }
 
-  # State and code objects (for the backend and refresh).
+  # Objects in the project buckets (state, code, frontend).
   statement {
-    sid       = "S3Objects"
-    effect    = "Allow"
-    actions   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:GetObjectVersion"]
-    resources = ["arn:aws:s3:::bedrock-chatbot-tfstate/*", "arn:aws:s3:::bedrock-chatbot-code-*/*"]
+    sid    = "S3Objects"
+    effect = "Allow"
+    actions = [
+      "s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:GetObjectVersion",
+      "s3:GetObjectTagging", "s3:PutObjectTagging", "s3:GetObjectAcl", "s3:GetObjectAttributes",
+    ]
+    resources = ["arn:aws:s3:::bedrock-chatbot-*/*"]
   }
 
   # Only this project's IAM roles.

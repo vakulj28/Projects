@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bedrock Chatbot</title>
+  <style>
+    :root {
+      --bg: #0f1115; --panel: #171a21; --line: #272b34;
+      --text: #e6e8ec; --muted: #9aa3b2; --accent: #6ea8fe; --user: #22303f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: var(--bg); color: var(--text);
+      font: 15px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      display: flex; justify-content: center;
+    }
+    .app { width: 100%; max-width: 720px; display: flex; flex-direction: column; height: 100vh; padding: 16px; }
+    header { display: flex; align-items: baseline; gap: 10px; padding: 8px 4px 14px; }
+    header h1 { font-size: 18px; margin: 0; }
+    header span { color: var(--muted); font-size: 13px; }
+    .code { display: flex; gap: 8px; margin-bottom: 12px; }
+    .code input { flex: 1; }
+    input, button, textarea {
+      font: inherit; color: var(--text); background: var(--panel);
+      border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px;
+    }
+    button { background: var(--accent); color: #0b1220; border: none; font-weight: 600; cursor: pointer; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    #messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 4px; }
+    .msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; white-space: pre-wrap; word-wrap: break-word; }
+    .msg.user { align-self: flex-end; background: var(--user); }
+    .msg.bot { align-self: flex-start; background: var(--panel); border: 1px solid var(--line); }
+    .msg.error { align-self: center; color: #ffb4b4; font-size: 13px; }
+    form.chat { display: flex; gap: 8px; margin-top: 12px; }
+    form.chat textarea { flex: 1; resize: none; height: 44px; }
+    .empty { color: var(--muted); text-align: center; margin-top: 40px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Bedrock Chatbot</h1>
+      <span>Amazon Nova Lite · serverless</span>
+    </header>
+
+    <div class="code">
+      <input id="code" type="password" placeholder="Access code" autocomplete="off" />
+    </div>
+
+    <div id="messages">
+      <div class="empty">Enter your access code, then ask a question.</div>
+    </div>
+
+    <form class="chat" id="form">
+      <textarea id="q" placeholder="Ask something…" required></textarea>
+      <button id="send" type="submit">Send</button>
+    </form>
+  </div>
+
+  <script>
+    const messages = document.getElementById("messages");
+    const form = document.getElementById("form");
+    const q = document.getElementById("q");
+    const send = document.getElementById("send");
+    const codeInput = document.getElementById("code");
+
+    // Remember the access code locally (per-browser convenience only).
+    try { codeInput.value = localStorage.getItem("accessCode") || ""; } catch {}
+    codeInput.addEventListener("change", () => {
+      try { localStorage.setItem("accessCode", codeInput.value); } catch {}
+    });
+
+    function addMsg(cls, text) {
+      const empty = messages.querySelector(".empty");
+      if (empty) empty.remove();
+      const el = document.createElement("div");
+      el.className = "msg " + cls;
+      el.textContent = text;
+      messages.appendChild(el);
+      messages.scrollTop = messages.scrollHeight;
+      return el;
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const question = q.value.trim();
+      const code = codeInput.value.trim();
+      if (!question) return;
+      if (!code) { addMsg("error", "Please enter the access code."); return; }
+
+      addMsg("user", question);
+      q.value = "";
+      send.disabled = true;
+      const bot = addMsg("bot", "");
+
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "content-type": "application/json", "x-access-code": code },
+          body: JSON.stringify({ question }),
+        });
+        if (!res.ok) {
+          bot.remove();
+          addMsg("error", res.status === 401 ? "Unauthorized — check your access code." : "Error " + res.status);
+          return;
+        }
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let text = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          text += decoder.decode(value, { stream: true });
+          bot.textContent = text;
+          messages.scrollTop = messages.scrollHeight;
+        }
+      } catch (err) {
+        bot.remove();
+        addMsg("error", "Network error: " + err.message);
+      } finally {
+        send.disabled = false;
+        q.focus();
+      }
+    });
+  </script>
+</body>
+</html>
