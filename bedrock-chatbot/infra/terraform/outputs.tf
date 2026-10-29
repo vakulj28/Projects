@@ -37,3 +37,11 @@ output "access_code_secret_name" {
 output "access_code_secret_arn" {
   value = aws_secretsmanager_secret.access_code.arn
 }
+
+output "cloudfront_domain" {
+  value = aws_cloudfront_distribution.main.domain_name
+}
+
+output "cloudfront_distribution_arn" {
+  value = aws_cloudfront_distribution.main.arn
+}

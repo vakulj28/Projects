@@ -53,3 +53,8 @@ variable "log_retention_days" {
   type        = number
   default     = 14
 }
+
+variable "web_function_domain" {
+  description = "The prod endpoint domain of the manually-created Web Function"
+  type        = string
+}

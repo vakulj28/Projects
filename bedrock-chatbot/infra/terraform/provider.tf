@@ -11,3 +11,9 @@ provider "aws" {
     }
   }
 }
+
+# Cloud Control provider — used only for the Lambda Web Function OAC, which
+# needs the `always-amz-auth` signing behavior the aws provider doesn't allow.
+provider "awscc" {
+  region = var.aws_region
+}
