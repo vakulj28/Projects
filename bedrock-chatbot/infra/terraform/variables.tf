@@ -11,6 +11,7 @@ variable "project" {
 variable "state_bucket_name" {
   description = "Globally-unique S3 bucket name for remote Terraform state"
   type        = string
+  default     = "bedrock-chatbot-tfstate"
 }
 
 variable "github_repo" {
@@ -34,6 +35,7 @@ variable "budget_limit_usd" {
 variable "budget_notify_email" {
   description = "Email that receives budget alerts"
   type        = string
+  default     = "tempemail@test.com"
 }
 
 variable "function_name" {
