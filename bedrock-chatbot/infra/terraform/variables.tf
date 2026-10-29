@@ -35,3 +35,21 @@ variable "budget_notify_email" {
   description = "Email that receives budget alerts"
   type        = string
 }
+
+variable "function_name" {
+  description = "Name of the Lambda Web Function"
+  type        = string
+  default     = "bedrock-chatbot"
+}
+
+variable "model_id" {
+  description = "Bedrock inference profile ID the app invokes"
+  type        = string
+  default     = "eu.amazon.nova-lite-v1:0"
+}
+
+variable "log_retention_days" {
+  description = "CloudWatch log retention for the Web Function"
+  type        = number
+  default     = 14
+}
