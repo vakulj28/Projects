@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="768" viewBox="0 0 1280 768" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#57606a"/>
+    </marker>
+    <style>
+      .box { fill: #ffffff; stroke: #d0d7de; stroke-width: 1.2; }
+      .t { font-size: 14px; font-weight: 600; fill: #1f2328; }
+      .s { font-size: 12px; fill: #57606a; }
+      .edge { fill: none; stroke: #57606a; stroke-width: 1.6; marker-end: url(#arr); }
+      .lbl { font-size: 11px; fill: #57606a; stroke: #ffffff; stroke-width: 4px; paint-order: stroke; stroke-linejoin: round; }
+      .g { fill: #ffffff; }
+      .gs { fill: none; stroke: #ffffff; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <!-- Canvas -->
+  <rect x="0" y="0" width="1280" height="768" rx="12" fill="#ffffff"/>
+
+  <!-- Title -->
+  <text x="40" y="44" font-size="20" font-weight="700" fill="#1f2328">Bedrock Chatbot — AWS Architecture</text>
+  <text x="40" y="66" class="s">Serverless streaming chatbot · Amazon Bedrock (Nova Lite) · Lambda Web Functions · CloudFront · Terraform + GitHub Actions (OIDC)</text>
+
+  <!-- ===== Boundaries ===== -->
+  <!-- AWS Cloud -->
+  <rect x="190" y="90" width="1060" height="440" rx="6" fill="#fbfcfd" stroke="#232f3e" stroke-width="1.5"/>
+  <rect x="200" y="100" width="12" height="12" rx="2" fill="#FF9900"/>
+  <text x="218" y="111" font-size="13" font-weight="700" fill="#232f3e">AWS Cloud</text>
+  <text x="218" y="160" font-size="11" fill="#57606a">Global</text>
+
+  <!-- Region -->
+  <rect x="400" y="105" width="835" height="410" rx="6" fill="none" stroke="#147eba" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="416" y="126" font-size="12" font-weight="700" fill="#147eba">Region · eu-west-1 (Ireland)</text>
+
+  <!-- GitHub -->
+  <rect x="190" y="570" width="1060" height="155" rx="6" fill="#f6f8fa" stroke="#24292f" stroke-width="1.5"/>
+  <text x="206" y="592" font-size="13" font-weight="700" fill="#24292f">GitHub</text>
+
+  <!-- User label -->
+  <text x="35" y="168" font-size="11" fill="#57606a">User</text>
+
+  <!-- ===== Edges (drawn under boxes' labels) ===== -->
+  <path class="edge" d="M160,220 H216"/>
+  <path class="edge" d="M378,195 H423"/>
+  <path class="edge" d="M378,245 H405 V315 H688"/>
+  <path class="edge" d="M910,280 L1008,203"/>
+  <path class="edge" d="M910,315 H1008"/>
+  <path class="edge" d="M910,350 L1008,432"/>
+  <path class="edge" d="M600,410 L728,372"/>
+  <path class="edge" d="M560,615 V548 H298 V487"/>
+  <path class="edge" d="M600,615 V492"/>
+  <path class="edge" d="M800,615 V492"/>
+  <path class="edge" d="M440,660 H518"/>
+  <path class="edge" d="M810,660 H888"/>
+
+  <!-- ===== Boxes ===== -->
+  <!-- Browser -->
+  <rect class="box" x="35" y="180" width="125" height="80" rx="8"/>
+  <rect x="47" y="202" width="36" height="36" rx="6" fill="#57606a"/>
+  <rect class="gs" x="54" y="212" width="22" height="16" rx="2"/>
+  <path class="gs" d="M54,217 H76"/>
+  <text x="91" y="216" class="t">Browser</text>
+  <text x="91" y="233" class="s">chat UI</text>
+
+  <!-- CloudFront -->
+  <rect class="box" x="218" y="175" width="160" height="90" rx="8"/>
+  <rect x="230" y="202" width="36" height="36" rx="6" fill="#8C4FFF"/>
+  <circle class="gs" cx="248" cy="220" r="9"/>
+  <ellipse class="gs" cx="248" cy="220" rx="4" ry="9"/>
+  <path class="gs" d="M239,220 H257"/>
+  <text x="274" y="216" class="t">CloudFront</text>
+  <text x="274" y="233" class="s">CDN · OAC</text>
+
+  <!-- AWS Budgets -->
+  <rect class="box" x="218" y="290" width="160" height="70" rx="8"/>
+  <rect x="230" y="307" width="36" height="36" rx="6" fill="#7AA116"/>
+  <text x="248" y="331" text-anchor="middle" font-size="18" font-weight="700" class="g">$</text>
+  <text x="274" y="321" class="t">AWS Budgets</text>
+  <text x="274" y="338" class="s">$5/mo alerts</text>
+
+  <!-- IAM -->
+  <rect class="box" x="218" y="395" width="160" height="90" rx="8"/>
+  <rect x="230" y="422" width="36" height="36" rx="6" fill="#DD344C"/>
+  <path class="g" d="M248,430 L256,434 V441 C256,446 252,449 248,451 C244,449 240,446 240,441 V434 Z"/>
+  <text x="274" y="436" class="t">IAM</text>
+  <text x="274" y="453" class="s">OIDC · roles</text>
+
+  <!-- S3 frontend -->
+  <rect class="box" x="425" y="145" width="200" height="80" rx="8"/>
+  <rect x="437" y="167" width="36" height="36" rx="6" fill="#7AA116"/>
+  <path class="g" d="M445,179 L465,179 L462,193 L448,193 Z"/>
+  <ellipse class="g" cx="455" cy="179" rx="10" ry="3"/>
+  <text x="481" y="181" class="t">S3 · frontend</text>
+  <text x="481" y="198" class="s">private · chat UI</text>
+
+  <!-- Lambda Web Function -->
+  <rect class="box" x="690" y="260" width="220" height="110" rx="8" style="stroke:#ED7100;stroke-width:2"/>
+  <rect x="702" y="297" width="36" height="36" rx="6" fill="#ED7100"/>
+  <text x="720" y="323" text-anchor="middle" font-size="22" font-weight="700" class="g">λ</text>
+  <text x="746" y="303" class="t">Lambda Web Function</text>
+  <text x="746" y="320" class="s">prod endpoint · IamAuth</text>
+  <text x="746" y="336" class="s">Hono app · Node 24</text>
+
+  <!-- S3 code packages -->
+  <rect class="box" x="425" y="410" width="200" height="80" rx="8"/>
+  <rect x="437" y="432" width="36" height="36" rx="6" fill="#7AA116"/>
+  <path class="g" d="M445,444 L465,444 L462,458 L448,458 Z"/>
+  <ellipse class="g" cx="455" cy="444" rx="10" ry="3"/>
+  <text x="481" y="446" class="t">S3 · code packages</text>
+  <text x="481" y="463" class="s">versioned · app.zip</text>
+
+  <!-- S3 Terraform state -->
+  <rect class="box" x="690" y="410" width="220" height="80" rx="8"/>
+  <rect x="702" y="432" width="36" height="36" rx="6" fill="#7AA116"/>
+  <path class="g" d="M710,444 L730,444 L727,458 L713,458 Z"/>
+  <ellipse class="g" cx="720" cy="444" rx="10" ry="3"/>
+  <text x="746" y="446" class="t">S3 · Terraform state</text>
+  <text x="746" y="463" class="s">remote state · lockfile</text>
+
+  <!-- Secrets Manager -->
+  <rect class="box" x="1010" y="145" width="210" height="80" rx="8"/>
+  <rect x="1022" y="167" width="36" height="36" rx="6" fill="#DD344C"/>
+  <rect class="g" x="1032" y="184" width="16" height="11" rx="2"/>
+  <path class="gs" d="M1035,184 V180 A5,5 0 0 1 1045,180 V184" style="stroke-width:2"/>
+  <text x="1066" y="181" class="t">Secrets Manager</text>
+  <text x="1066" y="198" class="s">app access code</text>
+
+  <!-- Amazon Bedrock -->
+  <rect class="box" x="1010" y="275" width="210" height="80" rx="8"/>
+  <rect x="1022" y="297" width="36" height="36" rx="6" fill="#01A88D"/>
+  <path class="g" d="M1040,305 L1043,312 L1050,315 L1043,318 L1040,325 L1037,318 L1030,315 L1037,312 Z"/>
+  <text x="1066" y="311" class="t">Amazon Bedrock</text>
+  <text x="1066" y="328" class="s">Nova Lite · streaming</text>
+
+  <!-- CloudWatch Logs -->
+  <rect class="box" x="1010" y="410" width="210" height="80" rx="8"/>
+  <rect x="1022" y="432" width="36" height="36" rx="6" fill="#E7157B"/>
+  <polyline class="gs" points="1030,456 1036,449 1041,453 1049,443" style="stroke-width:2"/>
+  <text x="1066" y="446" class="t">CloudWatch Logs</text>
+  <text x="1066" y="463" class="s">14-day retention</text>
+
+  <!-- Repository -->
+  <rect class="box" x="230" y="615" width="210" height="90" rx="8"/>
+  <rect x="242" y="642" width="36" height="36" rx="6" fill="#24292f"/>
+  <circle class="g" cx="255" cy="652" r="2.6"/>
+  <circle class="g" cx="255" cy="668" r="2.6"/>
+  <circle class="g" cx="265" cy="656" r="2.6"/>
+  <path class="gs" d="M255,655 V665"/>
+  <path class="gs" d="M265,659 C265,663 255,661 255,665"/>
+  <text x="286" y="656" class="t">Repository</text>
+  <text x="286" y="673" class="s">vakulj28/Projects</text>
+
+  <!-- GitHub Actions -->
+  <rect class="box" x="520" y="615" width="290" height="90" rx="8"/>
+  <rect x="532" y="642" width="36" height="36" rx="6" fill="#2088FF"/>
+  <circle class="gs" cx="550" cy="660" r="10" style="stroke-width:1.6"/>
+  <path class="g" d="M547,654 L555,660 L547,666 Z"/>
+  <text x="576" y="648" class="t">GitHub Actions</text>
+  <text x="576" y="665" class="s">app CI/CD · terraform plan</text>
+  <text x="576" y="681" class="s">gated apply (env approval)</text>
+
+  <!-- GitHub Packages -->
+  <rect class="box" x="890" y="615" width="240" height="90" rx="8"/>
+  <rect x="902" y="642" width="36" height="36" rx="6" fill="#8250DF"/>
+  <path class="gs" d="M920,651 L928,655.5 V664.5 L920,669 L912,664.5 V655.5 Z" style="stroke-width:1.6"/>
+  <path class="gs" d="M912,655.5 L920,660 L928,655.5 M920,660 V669" style="stroke-width:1.4"/>
+  <text x="946" y="656" class="t">GitHub Packages</text>
+  <text x="946" y="673" class="s">@vakulj28/bedrock-chatbot</text>
+
+  <!-- ===== Edge labels ===== -->
+  <text x="189" y="212" text-anchor="middle" class="lbl">HTTPS</text>
+  <text x="412" y="188" text-anchor="middle" class="lbl">/*</text>
+  <text x="556" y="307" text-anchor="middle" class="lbl">/api/* · signed by OAC</text>
+  <text x="959" y="236" text-anchor="middle" class="lbl">access code</text>
+  <text x="959" y="307" text-anchor="middle" class="lbl">ConverseStream</text>
+  <text x="959" y="395" text-anchor="middle" class="lbl">logs</text>
+  <text x="664" y="393" text-anchor="middle" class="lbl">revision code</text>
+  <text x="429" y="542" text-anchor="middle" class="lbl">OIDC · AssumeRoleWithWebIdentity</text>
+  <text x="608" y="562" class="lbl">upload app.zip</text>
+  <text x="808" y="562" class="lbl">terraform plan / apply</text>
+  <text x="479" y="652" text-anchor="middle" class="lbl">push / PR</text>
+  <text x="849" y="652" text-anchor="middle" class="lbl">publish</text>
+
+  <!-- Footnote -->
+  <text x="40" y="752" font-size="11" fill="#57606a">All AWS resources are provisioned with Terraform (aws + awscc providers) · CI/CD authenticates to AWS via GitHub OIDC — no stored AWS keys.</text>
+</svg>
