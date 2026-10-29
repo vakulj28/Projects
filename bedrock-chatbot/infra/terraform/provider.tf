@@ -1,7 +1,8 @@
 provider "aws" {
-  region  = var.aws_region
-  profile = var.aws_profile
+  region = var.aws_region
 
+  # Credentials come from the environment: the AWS_PROFILE env var locally
+  # (e.g. AWS_PROFILE=chatbot), or the OIDC-assumed role in GitHub Actions.
   default_tags {
     tags = {
       Project   = var.project

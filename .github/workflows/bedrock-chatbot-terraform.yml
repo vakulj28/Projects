@@ -1,0 +1,57 @@
+name: bedrock-chatbot Terraform
+
+on:
+  pull_request:
+    paths:
+      - "bedrock-chatbot/infra/terraform/**"
+      - ".github/workflows/bedrock-chatbot-terraform.yml"
+
+# id-token for OIDC; contents read for checkout.
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: bedrock-chatbot-tf-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bedrock-chatbot/infra/terraform
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+
+      - name: Format check
+        run: terraform fmt -check -recursive
+
+      # Assume the read-only plan role via GitHub OIDC (no stored keys).
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}
+          aws-region: eu-west-1
+
+      - name: Init
+        run: terraform init -input=false
+
+      - name: Validate
+        run: terraform validate -no-color
+
+      # -lock=false: the plan role is read-only and can't write the state lock.
+      - name: Plan
+        id: plan
+        run: terraform plan -input=false -lock=false -no-color
+
+      - name: Publish plan to job summary
+        if: always()
+        run: |
+          echo '### Terraform plan' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "${{ steps.plan.outputs.stdout }}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
