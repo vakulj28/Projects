@@ -230,7 +230,7 @@ data "aws_iam_policy_document" "apply" {
   statement {
     sid       = "Budgets"
     effect    = "Allow"
-    actions   = ["budgets:ViewBudget", "budgets:ModifyBudget"]
+    actions   = ["budgets:ViewBudget", "budgets:ModifyBudget", "budgets:ListTagsForResource"]
     resources = ["arn:aws:budgets::${data.aws_caller_identity.current.account_id}:budget/bedrock-chatbot-*"]
   }
 
@@ -242,6 +242,7 @@ data "aws_iam_policy_document" "apply" {
       "secretsmanager:CreateSecret", "secretsmanager:DeleteSecret", "secretsmanager:DescribeSecret",
       "secretsmanager:GetSecretValue", "secretsmanager:PutSecretValue", "secretsmanager:UpdateSecret",
       "secretsmanager:TagResource", "secretsmanager:UntagResource", "secretsmanager:GetResourcePolicy",
+      "secretsmanager:ListSecretVersionIds",
     ]
     resources = ["arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:bedrock-chatbot/*"]
   }
@@ -251,11 +252,19 @@ data "aws_iam_policy_document" "apply" {
     sid    = "Logs"
     effect = "Allow"
     actions = [
-      "logs:CreateLogGroup", "logs:DeleteLogGroup", "logs:DescribeLogGroups",
+      "logs:CreateLogGroup", "logs:DeleteLogGroup",
       "logs:PutRetentionPolicy", "logs:DeleteRetentionPolicy",
       "logs:TagResource", "logs:UntagResource", "logs:ListTagsForResource",
     ]
     resources = ["arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/web/bedrock-chatbot*"]
+  }
+
+  # DescribeLogGroups is a list operation and can't be scoped to one ARN.
+  statement {
+    sid       = "LogsDescribe"
+    effect    = "Allow"
+    actions   = ["logs:DescribeLogGroups"]
+    resources = ["*"]
   }
 
   # CloudFront distribution + OAC + managed-policy lookups. CloudFront actions
@@ -276,13 +285,14 @@ data "aws_iam_policy_document" "apply" {
     resources = ["*"]
   }
 
-  # Cloud Control API (the awscc provider manages the OAC through it).
+  # Cloud Control API (awscc OAC). Its operations are authorized under the
+  # cloudformation namespace, not cloudcontrol.
   statement {
     sid    = "CloudControl"
     effect = "Allow"
     actions = [
-      "cloudcontrol:CreateResource", "cloudcontrol:GetResource", "cloudcontrol:GetResourceRequestStatus",
-      "cloudcontrol:UpdateResource", "cloudcontrol:DeleteResource", "cloudcontrol:ListResources",
+      "cloudformation:CreateResource", "cloudformation:GetResource", "cloudformation:GetResourceRequestStatus",
+      "cloudformation:UpdateResource", "cloudformation:DeleteResource", "cloudformation:ListResources",
     ]
     resources = ["*"]
   }
