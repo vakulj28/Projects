@@ -149,6 +149,14 @@ data "aws_iam_policy_document" "apply_trust" {
       variable = "token.actions.githubusercontent.com:environment"
       values   = [var.github_environment]
     }
+
+    # AWS requires a sub (or job_workflow_ref) condition that isn't scoped to
+    # all. Constrain it to this environment's deployments.
+    condition {
+      test     = "StringLike"
+      variable = "token.actions.githubusercontent.com:sub"
+      values   = ["repo:*:environment:${var.github_environment}"]
+    }
   }
 }
 
