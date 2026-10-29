@@ -8,6 +8,8 @@ dist/
 *.tfstate.*
 *.tfvars
 !example.tfvars
+# Committed shared, non-sensitive config. Never put secrets here.
+!terraform.tfvars
 crash.log
 
 # Local env

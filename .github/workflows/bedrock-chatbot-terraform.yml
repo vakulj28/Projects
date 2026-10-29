@@ -52,7 +52,7 @@ jobs:
       # -lock=false: the plan role is read-only and can't write the state lock.
       - name: Plan
         id: plan
-        run: terraform plan -input=false -lock=false -no-color
+        run: terraform plan -input=false -lock=false -no-color -var-file=terraform.tfvars
 
       - name: Publish plan to job summary
         if: always()
@@ -88,4 +88,4 @@ jobs:
         run: terraform init -input=false
 
       - name: Apply
-        run: terraform apply -input=false -auto-approve
+        run: terraform apply -input=false -auto-approve -var-file=terraform.tfvars
