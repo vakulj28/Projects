@@ -83,7 +83,8 @@ jobs:
       - name: Set version
         run: npm version "0.1.0-ci.${{ github.run_number }}" --no-git-tag-version
 
+      # Prerelease versions must not go to the default "latest" tag.
       - name: Publish to GitHub Packages
-        run: npm publish
+        run: npm publish --tag ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
