@@ -20,13 +20,22 @@ data "aws_iam_policy_document" "plan_trust" {
       values   = ["sts.amazonaws.com"]
     }
 
-    # Pull requests (CI) and manual runs on main (workflow_dispatch) may plan.
+    # This org customizes the OIDC subject claim to embed numeric owner/repo IDs
+    # (repo:owner@<id>/repo@<id>:...), so pin the repo via the clean `repository`
+    # claim and wildcard the sub's id portion.
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:repository"
+      values   = [var.github_repo]
+    }
+
+    # Pull requests (CI) and pushes/manual runs on main may plan.
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
       values = [
-        "repo:${var.github_repo}:pull_request",
-        "repo:${var.github_repo}:ref:refs/heads/main",
+        "repo:*:pull_request",
+        "repo:*:ref:refs/heads/main",
       ]
     }
   }
@@ -106,5 +115,60 @@ data "aws_iam_policy_document" "execution" {
     effect    = "Allow"
     actions   = ["secretsmanager:GetSecretValue"]
     resources = [aws_secretsmanager_secret.access_code.arn]
+  }
+}
+
+# Write-capable "apply" role for CI. Trusted ONLY by the protected GitHub
+# Environment, so a run must be approved before it can assume this role.
+data "aws_iam_policy_document" "apply_trust" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+
+    principals {
+      type        = "Federated"
+      identifiers = [aws_iam_openid_connect_provider.github.arn]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:repository"
+      values   = [var.github_repo]
+    }
+
+    # Gated by the protected environment; match the clean `environment` claim
+    # (the sub embeds numeric IDs under this org's custom claim template).
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:environment"
+      values   = [var.github_environment]
+    }
+  }
+}
+
+# Permissions Terraform needs to manage this stack. Broad at the service level
+# because IaC creates resources whose ARNs aren't known ahead of time; the real
+# guardrails are the environment approval gate and the environment-scoped trust
+# above. Tightening iam:* with a permissions boundary is a production hardening.
+data "aws_iam_policy_document" "apply" {
+  statement {
+    sid    = "ManageStack"
+    effect = "Allow"
+    actions = [
+      "s3:*",
+      "iam:*",
+      "budgets:*",
+      "secretsmanager:*",
+      "logs:*",
+      "bedrock:GetInferenceProfile",
+      "bedrock:ListInferenceProfiles",
+    ]
+    resources = ["*"]
   }
 }

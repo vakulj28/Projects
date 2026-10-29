@@ -10,6 +10,10 @@ output "ci_plan_role_arn" {
   value = aws_iam_role.ci_plan.arn
 }
 
+output "ci_apply_role_arn" {
+  value = aws_iam_role.ci_apply.arn
+}
+
 output "account_id" {
   value = data.aws_caller_identity.current.account_id
 }
