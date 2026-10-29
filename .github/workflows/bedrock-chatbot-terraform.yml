@@ -1,6 +1,11 @@
 name: bedrock-chatbot Terraform
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "bedrock-chatbot/infra/terraform/**"
+      - ".github/workflows/bedrock-chatbot-terraform.yml"
   pull_request:
     paths:
       - "bedrock-chatbot/infra/terraform/**"
